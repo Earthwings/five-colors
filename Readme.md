@@ -1,6 +1,6 @@
 # Five Colors
 You are given a wooden board and nine stones. Can you arrange all stones in the board such that in every row and in every column each color occurs only once?
-![Five Colors Puzzle](doc/five-colors/board-game.png)
+![Five Colors Puzzle](doc/board-game.png)
 If you fail to find a solution on your own, the five-colors application can do all the hard work for you.
 **Spoiler alert: Reading the section below reveals the solution.**
 
