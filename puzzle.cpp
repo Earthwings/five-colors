@@ -337,10 +337,22 @@ void Solver::printSolution(const Solution &solution) const
 {
     map<char, string> names;
     names['B'] = "blue";
-    names['R'] = "red";
-    names['G'] = "green";
-    names['Y'] = "yellow";
+    names['C'] = "cyan";
     names['D'] = "black";
+    names['F'] = "fuchsia";
+    names['G'] = "green";
+    names['I'] = "indigo";
+    names['K'] = "khaki";
+    names['L'] = "lime";
+    names['M'] = "magenta";
+    names['O'] = "orange";
+    names['P'] = "pink";
+    names['R'] = "red";
+    names['S'] = "silver";
+    names['T'] = "teal";
+    names['V'] = "violet";
+    names['W'] = "white";
+    names['Y'] = "yellow";
     cout << "Solution:" << endl;
     for (auto const &assignment : solution) {
         Position const &position = assignment.first;
