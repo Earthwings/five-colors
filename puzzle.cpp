@@ -456,7 +456,7 @@ Layouts LayoutGenerator::findAll(const Stones &stones)
     vector<Position> layout;
     Board board(board_size);
     findAll(layouts, layout, board, store, 0);
-    return layouts;
+    return Layout::unify(layouts);
 }
 
 void LayoutGenerator::findAll(Layouts &layouts, vector<Position> &layout, Board &board,

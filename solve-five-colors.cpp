@@ -42,12 +42,8 @@ public:
         stones << "DRB" << "RDG" << "GYR" << "YBD" << "BGY" << "BGD" << "RDY";
         stones << "YR" << "GB";
 
-        auto const all_layouts = LayoutGenerator::findAll(stones);
-        std::cout << "Found " << all_layouts.size() << " layouts of which ";
-        auto const layouts = Layout::unify(all_layouts);
-        std::cout << layouts.size() << " are unique layouts." << endl;
         size_t solution_count = 0;
-        for (auto const &layout : layouts) {
+        for (auto const &layout : LayoutGenerator::findAll(stones)) {
             auto const solutions = Solver(layout, stones).findAssignment();
             solution_count += solutions.size();
         }
