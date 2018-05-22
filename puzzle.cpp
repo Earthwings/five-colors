@@ -436,7 +436,7 @@ Layouts LayoutGenerator::findAll(const Stones &stones)
         ++store[stone.fields.size()].count;
     }
 
-    for (size_t i = 1; i < board_size; ++i) {
+    for (size_t i = 1; i <= board_size; ++i) {
         store[i].stone = Stone(string(i, 'A'));
     }
 
@@ -461,7 +461,7 @@ void LayoutGenerator::findAll(Layouts &layouts, vector<Position> &layout, Board 
         // Cannot assign anything here, but a later position might still work
         findAll(layouts, layout, board, store, step + 1);
     }
-    for (size_t k = 1; k < board_size; ++k) {
+    for (size_t k = 1; k <= board_size; ++k) {
         auto & reserve = store[k];
         if (reserve.count == 0) {
             // No more stones of this size
