@@ -48,6 +48,14 @@ inline bool Stone::operator==(const Stone &other) const
     return fields == other.fields;
 }
 
+string Stone::value() const
+{
+    string result;
+    result.resize(fields.size());
+    copy(fields.begin(), fields.end(), back_inserter(result));
+    return result;
+}
+
 inline bool Position::operator==(const Position &other) const
 {
     return size == other.size && row == other.row && col == other.col &&
@@ -76,7 +84,15 @@ Board::Board(size_t size) : data_(size, Row(size, empty_)), size_(size)
     // does nothing
 }
 
-inline size_t Board::size() const
+Board::Board(size_t size, const Solution &solution) :
+    data_(size, Row(size, empty_)), size_(size)
+{
+    for (auto const &value: solution) {
+        assign(value.first, value.second);
+    }
+}
+
+size_t Board::size() const
 {
     return size_;
 }
@@ -155,7 +171,7 @@ Layout::Layout(size_t boardSize) : size_(boardSize)
     // nothing to do
 }
 
-inline size_t Layout::boardSize() const
+size_t Layout::boardSize() const
 {
     return size_;
 }
@@ -174,7 +190,7 @@ bool Layout::isFull() const
     return size_ * size_ == fill_;
 }
 
-inline std::vector<Position> const & Layout::positions() const
+std::vector<Position> const & Layout::positions() const
 {
     return positions_;
 }
@@ -333,7 +349,7 @@ Solutions Solver::findAssignment() const
     return solutions;
 }
 
-void Solver::printSolution(const Solution &solution) const
+void Solver::printSolution(const Solution &solution)
 {
     map<char, string> names;
     names['B'] = "blue";
@@ -383,8 +399,6 @@ void Solver::findAssignment(Solutions &solutions, Board &board, Stones &stones, 
     if (boardValid && stones.empty()) {
         // Solution found, stop recursion
         solutions.push_back(solution);
-        printSolution(solution);
-        board.print();
         return;
     }
 
@@ -426,10 +440,30 @@ void Solver::findAssignment(Solutions &solutions, Board &board, Stones &stones, 
 
 Layouts LayoutGenerator::findAll(const Stones &stones)
 {
-    // Determine board size from stones
     size_t all = 0;
     for (auto const &stone : stones) {
         all += stone.fields.size();
+    }
+    size_t const board_size = size_t(sqrt(all));
+    vector<size_t> count(board_size+1, 0);
+    for (auto const &stone : stones) {
+        if (stone.fields.size() > board_size) {
+            cerr << "Stone ";
+            copy(stone.fields.begin(), stone.fields.end(), ostream_iterator<char>(cerr, ""));
+            cerr << " does not fit into the board." << endl;
+            return Layouts();
+        }
+        ++count[stone.fields.size()];
+    }
+    return findAll(count);
+}
+
+Layouts LayoutGenerator::findAll(const vector<size_t> &stones)
+{
+    // Determine board size from stones
+    size_t all = 0;
+    for (size_t i=1, n=stones.size(); i<n; ++i) {
+        all += i * stones[i];
     }
     size_t const board_size = size_t(sqrt(all));
     if (board_size * board_size != all) {
@@ -438,17 +472,8 @@ Layouts LayoutGenerator::findAll(const Stones &stones)
     }
 
     vector<Store> store(board_size + 1);
-    for (auto const &stone : stones) {
-        if (stone.fields.size() > board_size) {
-            cerr << "Stone ";
-            copy(stone.fields.begin(), stone.fields.end(), ostream_iterator<char>(cerr, ""));
-            cerr << " does not fit into the board." << endl;
-            return Layouts();
-        }
-        ++store[stone.fields.size()].count;
-    }
-
     for (size_t i = 1; i <= board_size; ++i) {
+        store[i].count = i < stones.size() ? stones[i] : 0;
         store[i].stone = Stone(string(i, 'A'));
     }
 

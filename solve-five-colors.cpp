@@ -45,6 +45,12 @@ public:
         size_t solution_count = 0;
         for (auto const &layout : LayoutGenerator::findAll(stones)) {
             auto const solutions = Solver(layout, stones).findAssignment();
+            for (auto const &solution: solutions) {
+                Solver::printSolution(solution);
+                Board board(layout.boardSize(), solution);
+                board.print();
+            }
+
             solution_count += solutions.size();
         }
         cout << "Found " << solution_count << " solution(s) in total." << endl;

@@ -41,6 +41,7 @@ struct Stone {
     Stone(const std::string &value);
     bool operator==(const Stone &other) const;
     std::vector<char> fields;
+    std::string value() const;
 };
 using Stones = std::list<Stone>;
 Stones& operator<<(Stones& stones, const std::string &value);
@@ -56,6 +57,8 @@ struct Position {
     bool operator==(const Position &other) const;
     bool operator<(const Position &b) const;
 };
+using Solution = std::list<std::pair<Position, Stone>>;
+using Solutions = std::list<Solution>;
 
 // Determines if a string consists of unique characters. Extra data structure for performance reasons.
 class Counter
@@ -95,14 +98,26 @@ private:
 };
 
 // Game board with a matrix-like data structure
-class Board : public std::vector<std::vector<char>>
+class Board
 {
 public:
     using Cell = char;
-    using Row = vector<Cell>;
-    using Matrix = vector<Row>;
+    using Row = std::vector<Cell>;
+    using Matrix = std::vector<Row>;
 
     explicit Board(size_t size);
+    explicit Board(size_t size, const Solution &solution);
+
+    char & at(size_t row, size_t col)
+    {
+        return data_[row][col];
+    }
+
+    char at(size_t row, size_t col) const
+    {
+        return data_.at(row).at(col);
+    }
+
     size_t size() const;
     void assign(size_t row, size_t col, char value)
     {
@@ -204,10 +219,7 @@ private:
     size_t size_ = 0;
     size_t fill_ = 0;
 };
-
 using Layouts = std::list<Layout>;
-using Solution = std::list<std::pair<Position, Stone>>;
-using Solutions = std::list<Solution>;
 
 // Brute force solution search for a given layout and a given set of stones
 class Solver
@@ -215,9 +227,9 @@ class Solver
 public:
     Solver(const Layout & layout, const Stones & stones);
     Solutions findAssignment() const;
+    static void printSolution(const Solution & solution);
 
 private:
-    void printSolution(const Solution & solution) const;
     void findAssignment(Solutions &solutions, Board & board, Stones & stones, size_t layoutIndex,
                         Solution & solution) const;
 
@@ -229,6 +241,7 @@ private:
 class LayoutGenerator
 {
 public:
+    static Layouts findAll(const std::vector<size_t> &stones);
     static Layouts findAll(const Stones & stones);
 
 private:
