@@ -125,6 +125,66 @@ inline void Board::unassign(const Position &position, const Stone &stone)
     assign(position, empty);
 }
 
+bool Board::isValid(const Position &position) const
+{
+    if (position.horizontal) {
+        // Check the single row
+        {
+            Counter counter;
+            for (size_t col = 0; col < size_; ++col) {
+                if (data_[position.row][col] != empty_) {
+                    counter.add(data_[position.row][col]);
+                }
+            }
+            if (!counter.isValid()) {
+                return false;
+            }
+        }
+        // Check affected columns
+        for (size_t k = 0; k < position.size; ++k) {
+            size_t const col = position.col + k;
+            if (col >= size_) continue;
+            Counter counter;
+            for (size_t row = 0; row < size_; ++row) {
+                if (data_[row][col] != empty_) {
+                    counter.add(data_[row][col]);
+                }
+            }
+            if (!counter.isValid()) {
+                return false;
+            }
+        }
+    } else {
+        // Check affected rows
+        for (size_t k = 0; k < position.size; ++k) {
+            size_t const row = position.row + k;
+            if (row >= size_) continue;
+            Counter counter;
+            for (size_t col = 0; col < size_; ++col) {
+                if (data_[row][col] != empty_) {
+                    counter.add(data_[row][col]);
+                }
+            }
+            if (!counter.isValid()) {
+                return false;
+            }
+        }
+        // Check the single column
+        {
+            Counter counter;
+            for (size_t row = 0; row < size_; ++row) {
+                if (data_[row][position.col] != empty_) {
+                    counter.add(data_[row][position.col]);
+                }
+            }
+            if (!counter.isValid()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void Board::print() const
 {
     printf("%s", string(4 * size_, '-').c_str());
@@ -390,13 +450,7 @@ void Solver::printSolution(const Solution &solution)
 void Solver::findAssignment(Solutions &solutions, Board &board, Stones &stones, size_t layoutIndex,
                             Solution &solution) const
 {
-    auto const boardValid = board.isValid();
-    if (!boardValid) {
-        // No more solutions possible, stop recursion
-        return;
-    }
-
-    if (boardValid && stones.empty()) {
+    if (stones.empty()) {
         // Solution found, stop recursion
         solutions.push_back(solution);
         return;
@@ -414,7 +468,7 @@ void Solver::findAssignment(Solutions &solutions, Board &board, Stones &stones, 
         {
             // Try to fit the stone in forward direction. If it works, move on. Later on clean up.
             board.assign(positions[layoutIndex], stone);
-            if (board.isValid()) {
+            if (board.isValid(positions[layoutIndex])) {
                 solution.push_back({positions[layoutIndex], stone});
                 findAssignment(solutions, board, stones, layoutIndex + 1, solution);
                 solution.pop_back();
@@ -427,7 +481,7 @@ void Solver::findAssignment(Solutions &solutions, Board &board, Stones &stones, 
             Position reversed = positions[layoutIndex];
             reversed.reverse = !reversed.reverse;
             board.assign(reversed, stone);
-            if (board.isValid()) {
+            if (board.isValid(reversed)) {
                 solution.push_back({reversed, stone});
                 findAssignment(solutions, board, stones, layoutIndex + 1, solution);
                 solution.pop_back();

@@ -260,10 +260,31 @@ public:
     }
 };
 
+class ExceptionTest
+{
+public:
+    ExceptionTest()
+    {
+        Board board(3);
+        try {
+            board.assign(0, 0, '!');
+            board.isValid();
+            std::cout << "unit test failed at " << __FILE__ << ":" << __LINE__ << ". Exception not thrown for char '!'" << std::endl;
+            exit(127);
+        } catch (const std::out_of_range& e) {
+            // Expected
+        } catch (...) {
+             std::cout << "unit test failed at " << __FILE__ << ":" << __LINE__ << ". Wrong exception type thrown" << std::endl;
+             exit(127);
+        }
+    }
+};
+
 int main()
 {
     SmallGame small_game;
     MediumGame medium_game;
     LargeGame large_game;
     Variants variants;
+    ExceptionTest exception_test;
 }
