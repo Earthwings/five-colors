@@ -35,6 +35,7 @@
 #include <vector>
 #include <array>
 #include <iostream>
+#include <stdexcept>
 
 // A stone that can be set in the game board
 struct Stone {
@@ -64,22 +65,20 @@ using Solutions = std::list<Solution>;
 class Counter
 {
 public:
-    Counter() = default;
+    Counter() : seen_{} {}
 
     void add(char value)
     {
         if (value < min_) {
-            std::cerr << "Character " << value << " is too small, please decrease Counter::min_ field from now " << min_ << " to (at least) " << value << std::endl;
-            exit(3);
+            throw std::out_of_range(std::string("Character ") + value + " is too small");
         }
         size_t const val = size_t(value - min_);
         if (val >= seen_.size()) {
-            std::cerr << "Character " << value << " is too large, please increase Counter::seen_ field from now " << seen_.size() << " to (at least) " << val + 1 << std::endl;
-            exit(5);
+            throw std::out_of_range(std::string("Character ") + value + " is too large");
         }
 
         if (valid_) {
-            if (seen_[val] == true) {
+            if (seen_[val]) {
                 valid_ = false;
             } else {
                 seen_[val] = true;
@@ -94,7 +93,7 @@ public:
 private:
     bool valid_ = true;
     static constexpr char const min_ = '0';
-    std::vector<bool> seen_ = std::vector<bool>(80, false);
+    std::array<bool, 80> seen_;
 };
 
 // Game board with a matrix-like data structure
@@ -142,7 +141,6 @@ public:
         } else {
             for (size_t i = 0, n = stone.fields.size(); i < n; ++i) {
                 assign(row, col, stone.fields[i]);
-                data_[row][col] = stone.fields[i];
                 row += position.horizontal ? 0 : 1;
                 col += position.horizontal ? 1 : 0;
             }
@@ -178,6 +176,7 @@ public:
 
         return true;
     }
+    bool isValid(const Position &position) const;
     bool isFull() const
     {
         return size_ * size_ == fill_;
